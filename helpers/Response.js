@@ -23,6 +23,7 @@ class Response {
     }
 
     static serverError(res, message) {
+        if (message === "") message = "Oups! We screwed up big time. 	┻━┻ ︵ヽ(`Д´)ﾉ︵ ┻━┻"
         return res.status(505).json(new Response(505, message));
     }
 }

@@ -30,7 +30,7 @@ class QuizController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -58,7 +58,7 @@ class QuizController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -87,7 +87,7 @@ class QuizController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -116,7 +116,7 @@ class QuizController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -152,7 +152,7 @@ class QuizController {
             
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
 
     }

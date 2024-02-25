@@ -25,7 +25,7 @@ class FoldersController {
 
         } catch(e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -42,7 +42,7 @@ class FoldersController {
     
         } catch(e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -71,7 +71,7 @@ class FoldersController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -199,7 +199,7 @@ class FoldersController {
         //     if (error.message.startsWith("Aucun dossier trouvé")) {
         //         return res.status(404).json(Response.badRequest(error.message));
         //     }
-        //     res.status(500).json(Response.serverError(error.message));
+        //     res.status(500).json(Response.serverError(res, error.message));
         // }
     }
 

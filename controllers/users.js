@@ -77,7 +77,7 @@ class UsersController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 

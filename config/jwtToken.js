@@ -7,7 +7,7 @@ dotenv.config();
 class Token {
 
     constructor() {
-        
+
     }
 
     create(email, userId) {
@@ -15,17 +15,23 @@ class Token {
     }
 
     authenticate(req, res, next) {
-        const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
-        
-        if (!token) Response.unauthorized(res, 'Accès refusé. Aucun jeton fourni');
-    
-        jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
-            if (err) Response.unauthorized("Accès refusé. Jeton invalide.");
-    
-            req.user = payload;
+        try {
+            const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
 
-            next();
-        });
+            if (!token) Response.unauthorized(res, 'Accès refusé. Aucun jeton fourni');
+
+            jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+                if (err) Response.unauthorized("Accès refusé. Jeton invalide.");
+
+                req.user = payload;
+
+                next();
+            });
+        } catch (e) {
+            console.log(e);
+            return Response.serverError(res, "");
+        }
+
     }
 }
 

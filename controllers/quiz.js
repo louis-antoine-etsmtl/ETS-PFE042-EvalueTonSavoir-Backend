@@ -109,7 +109,7 @@ class QuizController {
             const result = await model.update(quizId, newTitle, newContent);
 
             if (!result) {
-                throw new Error("something whent wrong while deleting quiz.")
+                throw new Error("something whent wrong while updating quiz.")
             }
 
             return Response.ok(res, "Quiz mis à jours avec succès");

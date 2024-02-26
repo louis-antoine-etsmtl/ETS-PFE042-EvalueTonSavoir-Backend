@@ -69,8 +69,8 @@ class Quiz {
         const quizCollection = conn.collection('files');
 
         const result = await quizCollection.updateOne({ _id: new ObjectId(quizId) }, { $set: { title: newTitle, content: newContent } });
-
-        if (result.modifiedCount != 1) return false;
+        //Ne fonctionne pas si rien n'est chngé dans le quiz 
+        //if (result.modifiedCount != 1) return false;
 
         return true
     }

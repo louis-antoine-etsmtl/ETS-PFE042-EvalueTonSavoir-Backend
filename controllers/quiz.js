@@ -30,7 +30,7 @@ class QuizController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -58,7 +58,7 @@ class QuizController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -87,7 +87,7 @@ class QuizController {
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -109,14 +109,14 @@ class QuizController {
             const result = await model.update(quizId, newTitle, newContent);
 
             if (!result) {
-                throw new Error("something whent wrong while deleting quiz.")
+                throw new Error("something whent wrong while updating quiz.")
             }
 
             return Response.ok(res, "Quiz mis à jours avec succès");
 
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
     }
 
@@ -152,7 +152,7 @@ class QuizController {
             
         } catch (e) {
             console.log(e);
-            return Response.serverError("");
+            return Response.serverError(res, "");
         }
 
     }

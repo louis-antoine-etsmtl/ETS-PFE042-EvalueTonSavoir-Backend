@@ -18,10 +18,10 @@ class Token {
         try {
             const token = req.header('Authorization') && req.header('Authorization').split(' ')[1];
 
-            if (!token) Response.unauthorized(res, 'Accès refusé. Aucun jeton fourni');
+            if (!token) return Response.unauthorized(res, 'Accès refusé. Aucun jeton fourni');
 
             jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
-                if (err) Response.unauthorized(res, "Accès refusé. Jeton invalide.");
+                if (err) return Response.unauthorized(res, "Accès refusé. Jeton invalide.");
 
                 req.user = payload;
 

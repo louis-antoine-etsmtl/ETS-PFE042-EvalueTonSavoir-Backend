@@ -1,5 +1,5 @@
 exports.UNAUTHORIZED_NO_TOKEN_GIVEN = {
-    message: 'Accès refusé. Aucun jeton fourni',
+    message: 'Accès refusé. Aucun jeton fourni.',
     code: 401
 }
 exports.UNAUTHORIZED_INVALID_TOKEN = {

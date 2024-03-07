@@ -1,158 +1,169 @@
-const Response = require('../helpers/Response.js');
-
 const model = require('../models/quiz.js');
 const folderModel = require('../models/folders.js');
+
+const AppError = require('../middleware/AppError.js');
+const { MISSING_REQUIRED_PARAMETER, NOT_IMPLEMENTED, QUIZ_NOT_FOUND, FOLDER_NOT_FOUND, QUIZ_ALREADY_EXISTS, GETTING_QUIZ_ERROR, DELETE_QUIZ_ERROR, UPDATE_QUIZ_ERROR, MOVING_QUIZ_ERROR, DUPLICATE_QUIZ_ERROR, COPY_QUIZ_ERROR } = require('../constants/errorCodes');
 
 class QuizController {
 
     async create(req, res) {
-        const { title, content, folderId } = req.body;
-
-        if (!title || !content || !folderId) {
-            return Response.badRequest(res, "Title, content and folderId are required.");
-        }
-
         try {
+            const { title, content, folderId } = req.body;
+
+            if (!title || !content || !folderId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             // Is this folder mine
             const owner = await folderModel.getOwner(folderId);
 
             if (owner != req.user.userId) {
-                return Response.notFound(res, 'No folder with this id was found.');
+                throw new AppError(FOLDER_NOT_FOUND);
             }
 
             const result = await model.create(title, content, folderId, req.user.userId);
 
             if (!result) {
-                return Response.badRequest(res, "Quiz already exists.");
+                throw new AppError(QUIZ_ALREADY_EXISTS);
             }
 
-            return Response.ok(res, "Quiz Created successfully.");
+            return res.status(200).json({
+                message: 'Quiz créé avec succès.'
+            });
 
-        } catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
     async get(req, res) {
-        const { quizId } = req.params;
-
-        if (!quizId) {
-            return Response.badRequest(res, "quizId is required.");
-        }
-
         try {
+            const { quizId } = req.params;
+
+            if (!quizId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
 
             const content = await model.getContent(quizId);
 
             if (!content) {
-                throw new Error(res, "Something whent wrong while updating password.")
+                throw new AppError(GETTING_QUIZ_ERROR);
             }
 
             // Is this quiz mine
             if (content.userId != req.user.userId) {
-                return Response.notFound(res, 'No quiz with this id was found.');
+                throw new AppError(QUIZ_NOT_FOUND);
             }
 
-            return Response.ok(res, content);
+            return res.status(200).json({
+                data: content
+            });
 
-        } catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
     async delete(req, res) {
-        const { quizId } = req.params;
-
-        if (!quizId) {
-            return Response.badRequest(res, "quizId is required.");
-        }
-
         try {
+            const { quizId } = req.params;
+
+            if (!quizId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             // Is this quiz mine
             const owner = await model.getOwner(quizId);
 
             if (owner != req.user.userId) {
-                return Response.notFound(res, 'No quiz with this id was found.');
+                throw new AppError(QUIZ_NOT_FOUND);
             }
 
             const result = await model.delete(quizId);
 
             if (!result) {
-                throw new Error("something whent wrong while deleting quiz.")
+                throw new AppError(DELETE_QUIZ_ERROR);
             }
 
-            return Response.ok(res, "Quiz supprimé avec succès");
+            return res.status(200).json({
+                message: 'Quiz supprimé avec succès.'
+            });
 
-        } catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
     async update(req, res) {
-        const { quizId, newTitle, newContent } = req.body;
-
-        if (!newTitle || !newContent || !quizId) {
-            return Response.badRequest(res, "newTitle, newContent and quizId are required.");
-        }
-
         try {
+            const { quizId, newTitle, newContent } = req.body;
+
+            if (!newTitle || !newContent || !quizId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             // Is this quiz mine
             const owner = await model.getOwner(quizId);
 
             if (owner != req.user.userId) {
-                return Response.notFound(res, 'No quiz with this id was found.');
+                throw new AppError(QUIZ_NOT_FOUND);
             }
 
             const result = await model.update(quizId, newTitle, newContent);
 
             if (!result) {
-                throw new Error("something whent wrong while updating quiz.")
+                throw new AppError(UPDATE_QUIZ_ERROR);
             }
 
-            return Response.ok(res, "Quiz mis à jours avec succès");
+            return res.status(200).json({
+                message: 'Quiz mis à jours avec succès.'
+            });
 
-        } catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
     async move(req, res) {
-        const { quizId, newFolderId } = req.body;
-
-        if (!quizId || !newFolderId) {
-            return Response.badRequest(res, "QuizId and newFolderId are required.");
-        }
-
         try {
+            const { quizId, newFolderId } = req.body;
+
+            if (!quizId || !newFolderId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             // Is this quiz mine
             const quizOwner = await model.getOwner(quizId);
 
             if (quizOwner != req.user.userId) {
-                return Response.notFound(res, 'No quiz with this id was found.');
+                throw new AppError(QUIZ_NOT_FOUND);
             }
 
             // Is this folder mine
             const folderOwner = await folderModel.getOwner(newFolderId);
 
             if (folderOwner != req.user.userId) {
-                return Response.notFound(res, 'No folder with this id was found.');
+                throw new AppError(FOLDER_NOT_FOUND);
             }
 
             const result = await model.move(quizId, newFolderId);
 
             if (!result) {
-                throw new Error("something whent wrong while moving quiz.")
+                throw new AppError(MOVING_QUIZ_ERROR);
             }
 
-            return Response.ok(res, "Quiz a été déplacé avec succès");
-            
-        } catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+            return res.status(200).json({
+                message: 'Utilisateur déplacé avec succès.'
+            });
+
+        }
+        catch (error) {
+            return next(error);
         }
 
     }
@@ -161,10 +172,10 @@ class QuizController {
         const { quizId, newTitle } = req.body;
 
         if (!quizId || !newTitle) {
-            return Response.badRequest(res, "QuizId and newTitle are required.");
+            throw new AppError(MISSING_REQUIRED_PARAMETER);
         }
 
-        return Response.serverError(res, "NOT IMPLEMENTED");
+        throw new AppError(NOT_IMPLEMENTED);
         // const { quizId } = req.params;
         // const { quiz } = req.body;
 
@@ -198,10 +209,10 @@ class QuizController {
         const { quizId, newTitle } = req.body;
 
         if (!quizId || !newTitle) {
-            return Response.badRequest(res, "QuizId and newTitle are required.");
+            throw new AppError(MISSING_REQUIRED_PARAMETER);
         }
 
-        return Response.serverError(res, "NOT IMPLEMENTED");
+        throw new AppError(NOT_IMPLEMENTED);
         // const { quizId } = req.params;
         // const { newUserId } = req.body;
 

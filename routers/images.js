@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const jwt = require('../config/jwtToken.js');
+const jwt = require('../middleware/jwtToken.js');
 const imagesController = require('../controllers/images.js')
 
 // For getting the image out of the form data

@@ -16,6 +16,7 @@ const imagesRouter = require('./routers/images.js')
 // Setup environement
 dotenv.config();
 const db = require('./config/db.js');
+const errorHandler = require("./middleware/errorHandler.js");
 
 // Start app
 const app = express();
@@ -44,9 +45,11 @@ app.use(bodyParser.json());
 
 // Create routes
 app.use('/user', userRouter);
-app.use('/folder', folderRouter);
+// app.use('/folder', folderRouter);
 app.use('/quiz', quizRouter);
 app.use('/image', imagesRouter);
+
+app.use(errorHandler)
 
 // Start server
 async function start() {

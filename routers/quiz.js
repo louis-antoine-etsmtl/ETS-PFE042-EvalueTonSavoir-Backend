@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const jwt = require('../config/jwtToken.js');
+const jwt = require('../middleware/jwtToken.js');
 const quizController = require('../controllers/quiz.js')
 
 router.post("/create", jwt.authenticate, quizController.create);

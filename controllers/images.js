@@ -1,40 +1,42 @@
-const Response = require('../helpers/Response.js');
-
 const model = require('../models/images.js');
+
+const AppError = require('../middleware/AppError.js');
+const { MISSING_REQUIRED_PARAMETER, IMAGE_NOT_FOUND } = require('../constants/errorCodes');
 
 class ImagesController {
 
-    async upload(req, res) {
-        const file = req.file;
-
-        if (!file) {
-            return Response.badRequest(res, 'An image is required.');
-        }
-
+    async upload(req, res, next) {
         try {
+            const file = req.file;
+
+            if (!file) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             const id = await model.upload(file, req.user.userId);
 
-            return Response.ok(res, { id: id });
+            return res.status(200).json({
+                id: id
+            });
         }
-        catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        catch (error) {
+            return next(error);
         }
 
     }
 
-    async get(req, res) {
-        const { id } = req.params;
-
-        if (!id) {
-            return Response.badRequest(res, "An image id is required.");
-        }
-
+    async get(req, res, next) {
         try {
+            const { id } = req.params;
+
+            if (!id) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             const image = await model.get(id);
 
             if (!image) {
-                return Response.notFound(res, 'Image not found.');
+                throw new AppError(IMAGE_NOT_FOUND)
             }
 
             // Set Headers for display in browser
@@ -44,9 +46,8 @@ class ImagesController {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             return res.send(image.file_content);
         }
-        catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        catch (error) {
+            return next(error);
         }
     }
 

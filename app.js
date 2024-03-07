@@ -45,7 +45,7 @@ app.use(bodyParser.json());
 
 // Create routes
 app.use('/user', userRouter);
-// app.use('/folder', folderRouter);
+app.use('/folder', folderRouter);
 app.use('/quiz', quizRouter);
 app.use('/image', imagesRouter);
 

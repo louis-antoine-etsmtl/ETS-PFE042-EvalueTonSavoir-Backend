@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const jwt = require('../config/jwtToken.js');
+const jwt = require('../middleware/jwtToken.js');
 const usersController = require('../controllers/users.js')
 
 router.post("/register", usersController.register);

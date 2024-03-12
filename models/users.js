@@ -1,5 +1,7 @@
 const db = require('../config/db.js');
 const bcrypt = require('bcrypt');
+const AppError = require('../middleware/AppError.js');
+const { USER_ALREADY_EXISTS } = require('../constants/errorCodes');
 
 class Users {
     async hashPassword(password) {
@@ -22,7 +24,9 @@ class Users {
 
         const existingUser = await userCollection.findOne({ email: email });
 
-        if (existingUser) return null;
+        if (existingUser) {
+            throw new AppError(USER_ALREADY_EXISTS);
+        }
 
         const newUser = {
             email: email,
@@ -30,11 +34,9 @@ class Users {
             created_at: new Date()
         };
 
-        const insertResult = await userCollection.insertOne(newUser);
+        await userCollection.insertOne(newUser);
 
         // TODO: verif if inserted properly...
-
-        return newUser;
     }
 
     async login(email, password) {

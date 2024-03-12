@@ -1,6 +1,7 @@
-const Response = require('../helpers/Response.js');
-
 const model = require('../models/folders.js');
+
+const AppError = require('../middleware/AppError.js');
+const { MISSING_REQUIRED_PARAMETER, NOT_IMPLEMENTED, FOLDER_NOT_FOUND, FOLDER_ALREADY_EXISTS, GETTING_FOLDER_ERROR, DELETE_FOLDER_ERROR, UPDATE_FOLDER_ERROR, MOVING_FOLDER_ERROR, DUPLICATE_FOLDER_ERROR, COPY_FOLDER_ERROR } = require('../constants/errorCodes');
 
 class FoldersController {
 
@@ -8,24 +9,26 @@ class FoldersController {
      * Basic queries
      */
     async create(req, res) {
-        const { title } = req.body;
-
-        if (!title) {
-            return Response.badRequest(res, "Title is required.");
-        }
-
         try {
+            const { title } = req.body;
+
+            if (!title) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             const result = await model.create(title, req.user.userId);
 
             if (!result) {
-                return Response.badRequest(res, "Folder already exists.");
+                throw new AppError(FOLDER_ALREADY_EXISTS);
             }
 
-            return Response.ok(res, "Folder Created successfully.");
+            return res.status(200).json({
+                message: 'Dossier créé avec succès.'
+            });
 
-        } catch(e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
@@ -35,101 +38,109 @@ class FoldersController {
             const folders = await model.getUserFolders(req.user.userId);
 
             if (!folders) {
-                throw new Error("Aucun dossier trouvé");
+                throw new AppError(FOLDER_NOT_FOUND);
             }
 
-            return Response.ok(res, folders);
-    
-        } catch(e) {
-            console.log(e);
-            return Response.serverError(res, "");
+            return res.status(200).json({
+                data: folders
+            });
+
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
     async getFolderContent(req, res) {
-        const { folderId } = req.params;
-
-        if (!folderId) {
-            return Response.badRequest(res, "FolderId is required.");
-        }
-
         try {
+            const { folderId } = req.params;
+
+            if (!folderId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             // Is this folder mine
             const owner = await model.getOwner(folderId);
 
-            if(owner != req.user.userId) {
-                return Response.notFound(res, 'No folder with this id was found.');
+            if (owner != req.user.userId) {
+                throw new AppError(FOLDER_NOT_FOUND);
             }
 
             const content = await model.getContent(folderId);
 
-            if(!content) {
-                throw new Error(res, "Something whent wrong while updating password.")
+            if (!content) {
+                throw new AppError(GETTING_FOLDER_ERROR);
             }
 
-            return Response.ok(res, content);
+            return res.status(200).json({
+                data: content
+            });
 
-        } catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
     async delete(req, res) {
-        const { folderId } = req.params;
-
-        if (!folderId) {
-            return Response.badRequest(res, "FolderId is required.");
-        }
-
         try {
+            const { folderId } = req.params;
+
+            if (!folderId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             // Is this folder mine
             const owner = await model.getOwner(folderId);
 
-            if(owner != req.user.userId) {
-                return Response.notFound(res, 'No folder with this id was found.');
+            if (owner != req.user.userId) {
+                throw new AppError(FOLDER_NOT_FOUND);
             }
 
             const result = await model.delete(folderId);
 
             if (!result) {
-                throw new Error("something whent wrong while deleting folder.")
+                throw new AppError(DELETE_FOLDER_ERROR);
             }
 
-            return Response.ok(res, "Dossier supprimé avec succès");
-    
-        } catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+            return res.status(200).json({
+                message: 'Dossier supprimé avec succès.'
+            });
+
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
     async rename(req, res) {
-        const { folderId, newTitle } = req.body;
-
-        if (!folderId || !newTitle) {
-            return Response.badRequest(res, "FolderId is required.");
-        }
-
         try {
+            const { folderId, newTitle } = req.body;
+
+            if (!folderId || !newTitle) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
             // Is this folder mine
             const owner = await model.getOwner(folderId);
 
-            if(owner != req.user.userId) {
-                return Response.notFound(res, 'No folder with this id was found.');
+            if (owner != req.user.userId) {
+                throw new AppError(FOLDER_NOT_FOUND);
             }
 
             const result = await model.rename(folderId, newTitle);
 
             if (!result) {
-                throw new Error("something whent wrong while renaming folder.")
+                throw new AppError(UPDATE_FOLDER_ERROR);
             }
 
-            return Response.ok(res, "Dossier renomé avec succès");
+            return res.status(200).json({
+                message: 'Dossier mis à jours avec succès.'
+            });
 
-        } catch (e) {
-            console.log(e);
-            return Response.serverError(res, "");
+        }
+        catch (error) {
+            return next(error);
         }
     }
 
@@ -141,10 +152,10 @@ class FoldersController {
         const { folderId, newTitle } = req.body;
 
         if (!folderId || !newTitle) {
-            return Response.badRequest(res, "FolderId and newTitle are required.");
+            throw new AppError(MISSING_REQUIRED_PARAMETER);
         }
 
-        return Response.serverError(res, "NOT IMPLEMENTED");
+        throw new AppError(NOT_IMPLEMENTED);
 
         // try {
         //     //Trouver le folder a dupliquer 
@@ -158,7 +169,7 @@ class FoldersController {
         //     //Ajout du duplicata
         //     const newFolder = await conn.collection('folders').insertOne({ ...folderToDuplicate });
         //     res.json(Response.ok("Dossier dupliqué"));
-    
+
         // } catch (error) {
         //     if (error.message.startsWith("Aucun dossier trouvé")) {
         //         return res.status(404).json(Response.badRequest(error.message));
@@ -171,10 +182,10 @@ class FoldersController {
         const { folderId, newTitle } = req.body;
 
         if (!folderId || !newTitle) {
-            return Response.badRequest(res, "FolderId and newTitle are required.");
+            throw new AppError(MISSING_REQUIRED_PARAMETER);
         }
 
-        return Response.serverError(res, "NOT IMPLEMENTED");
+        throw new AppError(NOT_IMPLEMENTED);
 
 
 
@@ -194,7 +205,7 @@ class FoldersController {
         //     //Ajout du duplicata
         //     await conn.collection('folders').insertOne({ ...folderToDuplicate, userId: new ObjectId(newUserId) });
         //     res.json(Response.ok("Dossier dupliqué avec succès pour un autre utilisateur"));
-    
+
         // } catch (error) {
         //     if (error.message.startsWith("Aucun dossier trouvé")) {
         //         return res.status(404).json(Response.badRequest(error.message));

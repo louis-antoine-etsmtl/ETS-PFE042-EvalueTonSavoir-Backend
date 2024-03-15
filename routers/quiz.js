@@ -6,7 +6,7 @@ const quizController = require('../controllers/quiz.js')
 
 router.post("/create", jwt.authenticate, quizController.create);
 router.get("/get/:quizId", jwt.authenticate, quizController.get);
-router.delete("/delete/:quizId", jwt.authenticate, quizController.delete);
+router.post("/delete/:quizId", jwt.authenticate, quizController.delete);
 router.put("/update", jwt.authenticate, quizController.update);
 router.put("/move", jwt.authenticate, quizController.move);
 

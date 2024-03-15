@@ -169,9 +169,9 @@ class QuizController {
     }
 
     async duplicate(req, res) {
-        const { quizId, newTitle } = req.body;
+        const { quizId, newTitle, folderId } = req.body;
 
-        if (!quizId || !newTitle) {
+        if (!quizId || !newTitle || !folderId) {
             throw new AppError(MISSING_REQUIRED_PARAMETER);
         }
 
@@ -206,9 +206,9 @@ class QuizController {
     }
 
     async copy(req, res) {
-        const { quizId, newTitle } = req.body;
+        const { quizId, newTitle, folderId } = req.body;
 
-        if (!quizId || !newTitle) {
+        if (!quizId || !newTitle || !folderId) {
             throw new AppError(MISSING_REQUIRED_PARAMETER);
         }
 

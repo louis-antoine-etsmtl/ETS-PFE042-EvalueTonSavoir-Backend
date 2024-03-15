@@ -8,7 +8,7 @@ class FoldersController {
     /***
      * Basic queries
      */
-    async create(req, res) {
+    async create(req, res, next) {
         try {
             const { title } = req.body;
 
@@ -32,7 +32,7 @@ class FoldersController {
         }
     }
 
-    async getUserFolders(req, res) {
+    async getUserFolders(req, res, next) {
 
         try {
             const folders = await model.getUserFolders(req.user.userId);
@@ -51,7 +51,7 @@ class FoldersController {
         }
     }
 
-    async getFolderContent(req, res) {
+    async getFolderContent(req, res, next) {
         try {
             const { folderId } = req.params;
 
@@ -82,7 +82,7 @@ class FoldersController {
         }
     }
 
-    async delete(req, res) {
+    async delete(req, res, next) {
         try {
             const { folderId } = req.params;
 
@@ -113,7 +113,7 @@ class FoldersController {
         }
     }
 
-    async rename(req, res) {
+    async rename(req, res, next) {
         try {
             const { folderId, newTitle } = req.body;
 
@@ -148,7 +148,7 @@ class FoldersController {
     /**
      * Sharing and advance queries
      */
-    async duplicate(req, res) {
+    async duplicate(req, res, next) {
         const { folderId, newTitle } = req.body;
 
         if (!folderId || !newTitle) {
@@ -178,7 +178,7 @@ class FoldersController {
         // }
     }
 
-    async copy(req, res) {
+    async copy(req, res, next) {
         const { folderId, newTitle } = req.body;
 
         if (!folderId || !newTitle) {

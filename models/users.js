@@ -1,9 +1,12 @@
+//user
 const db = require('../config/db.js');
 const bcrypt = require('bcrypt');
 const AppError = require('../middleware/AppError.js');
 const { USER_ALREADY_EXISTS } = require('../constants/errorCodes');
+const Folders = require('../models/folders.js');
 
 class Users {
+    
     async hashPassword(password) {
         return await bcrypt.hash(password, 10)
     }
@@ -19,7 +22,7 @@ class Users {
     async register(email, password) {
         await db.connect()
         const conn = db.getConnection();
-
+        
         const userCollection = conn.collection('users');
 
         const existingUser = await userCollection.findOne({ email: email });
@@ -35,6 +38,10 @@ class Users {
         };
 
         await userCollection.insertOne(newUser);
+
+        const folderTitle = 'Dossier par Défaut'; 
+        const userId = newUser._id; 
+        await Folders.create(folderTitle, userId);
 
         // TODO: verif if inserted properly...
     }

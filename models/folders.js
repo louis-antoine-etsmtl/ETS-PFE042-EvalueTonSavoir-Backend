@@ -1,3 +1,4 @@
+//model
 const db = require('../config/db.js')
 const { ObjectId } = require('mongodb');
 
@@ -82,6 +83,65 @@ class Folders {
 
         return true
     }
+
+    async duplicate(folderId, userId) {
+       
+            
+            const sourceFolder = await this.getFolderWithContent(folderId);
+            const newFolderId = await this.create(sourceFolder.title + "-copie", userId);
+    
+            if (!newFolderId) {
+                throw new Error('Failed to create a duplicate folder.');
+            }
+    
+            for (const quiz of sourceFolder.content) {
+                await this.createQuiz(quiz.title, quiz.content, newFolderId, userId);
+            }
+    
+            return newFolderId;
+        
+    }
+    
+    async copy(folderId, userId) {
+       
+            
+            const sourceFolder = await this.getFolderWithContent(folderId);  
+            const newFolderId = await this.create(sourceFolder.title, userId);    
+            if (!newFolderId) {
+                throw new Error('Failed to create a new folder.');
+            }
+            for (const quiz of sourceFolder.content) {
+                await this.createQuiz(quiz.title, quiz.content, newFolderId, userId);
+            }
+    
+            return newFolderId;
+       
+    }
+    async getFolderById(folderId) {
+        await db.connect();
+        const conn = db.getConnection();
+    
+        const foldersCollection = conn.collection('folders');
+    
+        const folder = await foldersCollection.findOne({ _id: new ObjectId(folderId) });
+    
+        return folder;
+    }
+    
+
+    async getFolderWithContent(folderId) {
+       
+            const folder = await this.getFolderById(folderId);
+            
+            const content = await this.getContent(folderId); 
+            
+            return {
+                ...folder,
+                content: content 
+            };
+       
+    }
+    
 }
 
 module.exports = new Folders;

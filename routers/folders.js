@@ -10,7 +10,9 @@ router.get("/getFolderContent/:folderId", jwt.authenticate, foldersController.ge
 router.delete("/delete/:folderId", jwt.authenticate, foldersController.delete);
 router.put("/rename", jwt.authenticate, foldersController.rename);
 
+//router.post("/duplicate", jwt.authenticate, foldersController.duplicate);
 router.post("/duplicate", jwt.authenticate, foldersController.duplicate);
+
 router.post("/copy/:folderId", jwt.authenticate, foldersController.copy);
 
 module.exports = router;

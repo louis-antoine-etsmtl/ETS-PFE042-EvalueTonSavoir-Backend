@@ -238,6 +238,25 @@ class QuizController {
         // }
     }
 
+    async deleteQuizzesByFolderId(req, res, next) {
+        try {
+            const { folderId } = req.params;
+
+            if (!folderId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
+            // Call the method from the Quiz model to delete quizzes by folder ID
+            await Quiz.deleteQuizzesByFolderId(folderId);
+
+            return res.status(200).json({
+                message: 'Quizzes deleted successfully.'
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
 }
 
 module.exports = new QuizController;

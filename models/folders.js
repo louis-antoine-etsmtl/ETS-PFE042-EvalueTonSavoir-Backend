@@ -68,6 +68,7 @@ class Folders {
         const folderResult = await foldersCollection.deleteOne({ _id: new ObjectId(folderId) });
 
         if (folderResult.deletedCount != 1) return false;
+        await Quiz.deleteQuizzesByFolderId(folderId);
 
         return true;
     }

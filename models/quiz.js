@@ -61,6 +61,15 @@ class Quiz {
 
         return true;
     }
+    async deleteQuizzesByFolderId(folderId) {
+        await db.connect();
+        const conn = db.getConnection();
+    
+        const quizzesCollection = conn.collection('files');
+    
+        // Delete all quizzes with the specified folderId
+        await quizzesCollection.deleteMany({ folderId: folderId });
+    }
 
     async update(quizId, newTitle, newContent) {
         await db.connect()

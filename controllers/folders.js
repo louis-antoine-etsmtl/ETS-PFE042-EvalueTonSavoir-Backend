@@ -218,6 +218,27 @@ class FoldersController {
         }
     }
 
+    async folderExists(req, res, next) {
+        try {
+            const { title } = req.body;
+    
+            if (!title) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+    
+            const userId = req.user.userId; 
+    
+            // Vérifie si le dossier existe pour l'utilisateur donné
+            const exists = await model.folderExists(title, userId);
+    
+            return res.status(200).json({
+                exists: exists
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
 
 }
 

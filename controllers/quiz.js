@@ -168,43 +168,7 @@ class QuizController {
 
     }
 
-    async duplicate(req, res, next) {
-        const { quizId, newTitle, folderId } = req.body;
-
-        if (!quizId || !newTitle || !folderId) {
-            throw new AppError(MISSING_REQUIRED_PARAMETER);
-        }
-
-        throw new AppError(NOT_IMPLEMENTED);
-        // const { quizId } = req.params;
-        // const { quiz } = req.body;
-
-        // try {
-        //     //Trouver le quizz a dupliquer 
-        //     const conn = db.getConnection();
-        //     const quiztoduplicate = await conn.collection('quiz').findOne({ _id: quizId });
-        //     if (!quiztoduplicate) {
-        //         throw new Error("quiz non trouvé");
-        //     }
-
-        //     //changement du id du folder pour ne pas le répliquer 
-        //     const { _id, title, questions = [] } = quiz;
-        //     console.log(_id);
-        //     quiztoduplicate._id = _id;
-        //     quiztoduplicate.title = title;
-
-        //     //Ajout du duplicata
-        //     await conn.collection('quiz').insertOne({ ...quiztoduplicate });
-        //     res.json(Response.ok("quiz dupliqué"));
-
-        // } catch (error) {
-        //     if (error.message.startsWith("quiz non trouvé")) {
-        //         return res.status(404).json(Response.badRequest(error.message));
-        //     }
-        //     res.status(500).json(Response.serverError(error.message));
-        // }
-    }
-
+    
     async copy(req, res, next) {
         const { quizId, newTitle, folderId } = req.body;
 
@@ -240,7 +204,7 @@ class QuizController {
 
     async deleteQuizzesByFolderId(req, res, next) {
         try {
-            const { folderId } = req.params;
+            const { folderId } = req.body;
 
             if (!folderId) {
                 throw new AppError(MISSING_REQUIRED_PARAMETER);
@@ -254,6 +218,26 @@ class QuizController {
             });
         } catch (error) {
             return next(error);
+        }
+    }
+
+    async duplicate(req, res, next) {
+        const { quizId  } = req.body;
+
+        try {
+            const newQuizId = await model.duplicate(quizId,req.user.userId);
+            res.status(200).json({ success: true, newQuizId });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+    async quizExists(title, userId) {
+        try {
+            const existingFile = await model.quizExists(title, userId);
+            return existingFile !== null;
+        } catch (error) {
+            throw new AppError(GETTING_QUIZ_ERROR);
         }
     }
 

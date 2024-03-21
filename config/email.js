@@ -35,6 +35,15 @@ class Emailer {
         });
     }
 
+    quizShare(email, quizId) {
+        this.transporter.sendMail({
+            from: this.senderEmail,
+            to: email,
+            subject: 'Un quiz vous a été transféré !',
+            text: 'Le id du quiz est le : '+ quizId 
+        });
+    }
+
 }
 
 module.exports = new Emailer();

@@ -12,5 +12,7 @@ router.put("/move", jwt.authenticate, quizController.move);
 
 router.post("/duplicate", jwt.authenticate, quizController.duplicate);
 router.post("/copy/:quizId", jwt.authenticate, quizController.copy);
+router.put("/Share", jwt.authenticate, quizController.Share);
+router.post("/receiveShare", jwt.authenticate, quizController.receiveShare);
 
 module.exports = router;

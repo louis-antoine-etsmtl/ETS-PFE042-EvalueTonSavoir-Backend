@@ -249,12 +249,37 @@ class QuizController {
             if ( !quizId || !email) {
                 throw new AppError(MISSING_REQUIRED_PARAMETER);
             }            
-           console.log(quizId);
 
-            emailer.quizShare(email, quizId);
+            const link = `${process.env.FRONTEND_URL}/teacher/Share/${quizId}`;
+
+            emailer.quizShare(email, link);
     
             return res.status(200).json({
                 message: 'Quiz  partagé avec succès.'
+            });
+    
+        }
+        catch (error) {
+            return next(error);
+        }
+    }    
+    
+    async getShare(req, res, next) {
+        try {
+            const { quizId } = req.params;
+    
+            if ( !quizId ) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }            
+
+            const content = await model.getContent(quizId);
+
+            if (!content) {
+                throw new AppError(GETTING_QUIZ_ERROR);
+            }
+
+            return res.status(200).json({
+                data: content.title
             });
     
         }
@@ -270,18 +295,17 @@ class QuizController {
             if (!quizId || !folderId) {
                 throw new AppError(MISSING_REQUIRED_PARAMETER);
             }
+
             const folderOwner = await folderModel.getOwner(folderId);
             if (folderOwner != req.user.userId) {
                 throw new AppError(FOLDER_NOT_FOUND);
             }
     
-            
             const content = await model.getContent(quizId);
             if (!content) {
                 throw new AppError(GETTING_QUIZ_ERROR);
             }
     
-            
             const result = await model.create(content.title, content.content, folderId, req.user.userId);
             if (!result) {
                 throw new AppError(QUIZ_ALREADY_EXISTS);

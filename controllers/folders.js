@@ -1,3 +1,4 @@
+//controller
 const model = require('../models/folders.js');
 
 const AppError = require('../middleware/AppError.js');
@@ -145,75 +146,102 @@ class FoldersController {
     }
 
 
-    /**
-     * Sharing and advance queries
-     */
     async duplicate(req, res, next) {
-        const { folderId, newTitle } = req.body;
+        try {
+            const { folderId,  } = req.body;
 
-        if (!folderId || !newTitle) {
-            throw new AppError(MISSING_REQUIRED_PARAMETER);
+            if (!folderId ) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
+            const userId = req.user.userId; 
+
+            const newFolderId = await model.duplicate(folderId, userId);
+
+            if (!newFolderId) {
+                throw new AppError(DUPLICATE_FOLDER_ERROR);
+            }
+
+            return res.status(200).json({
+                message: 'Dossier dupliqué avec succès.',
+                newFolderId: newFolderId
+            });
+        } catch (error) {
+            return next(error);
         }
-
-        throw new AppError(NOT_IMPLEMENTED);
-
-        // try {
-        //     //Trouver le folder a dupliquer 
-        //     const conn = db.getConnection();
-        //     const folderToDuplicate = await conn.collection('folders').findOne({ _id: new ObjectId(folderId) });
-        //     if (!folderToDuplicate) {
-        //         throw new Error("Dossier non trouvé");
-        //     }
-        //     //Suppression du id du folder pour ne pas le répliquer 
-        //     delete folderToDuplicate._id;
-        //     //Ajout du duplicata
-        //     const newFolder = await conn.collection('folders').insertOne({ ...folderToDuplicate });
-        //     res.json(Response.ok("Dossier dupliqué"));
-
-        // } catch (error) {
-        //     if (error.message.startsWith("Aucun dossier trouvé")) {
-        //         return res.status(404).json(Response.badRequest(error.message));
-        //     }
-        //     res.status(500).json(Response.serverError(error.message));
-        // }
     }
 
     async copy(req, res, next) {
-        const { folderId, newTitle } = req.body;
+        try {
+            const { folderId, newTitle } = req.body;
 
-        if (!folderId || !newTitle) {
-            throw new AppError(MISSING_REQUIRED_PARAMETER);
+            if (!folderId || !newTitle) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
+            const userId = req.user.userId; // Assuming userId is obtained from authentication
+
+            const newFolderId = await model.copy(folderId, userId);
+
+            if (!newFolderId) {
+                throw new AppError(COPY_FOLDER_ERROR);
+            }
+
+            return res.status(200).json({
+                message: 'Dossier copié avec succès.',
+                newFolderId: newFolderId
+            });
+        } catch (error) {
+            return next(error);
         }
+    }
+    
+    async getFolderById(req, res, next) {
+        try {
+            const { folderId } = req.params;
 
-        throw new AppError(NOT_IMPLEMENTED);
+            if (!folderId) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
 
+            const folder = await model.getFolderById(folderId);
 
+            if (!folder) {
+                throw new AppError(FOLDER_NOT_FOUND);
+            }
 
-        // const { folderId } = req.params;
-        // const { newUserId } = req.body;
-        // console.log(folderId);
-        // try {
-        //     //Trouver le folder a dupliquer 
-        //     const conn = db.getConnection();
-        //     const folderToDuplicate = await conn.collection('folders').findOne({ _id: new ObjectId(folderId) });
-        //     if (!folderToDuplicate) {
-        //         throw new Error("Dossier non trouvé");
-        //     }
-        //     console.log(folderToDuplicate);
-        //     //Suppression du id du folder pour ne pas le répliquer 
-        //     delete folderToDuplicate._id;
-        //     //Ajout du duplicata
-        //     await conn.collection('folders').insertOne({ ...folderToDuplicate, userId: new ObjectId(newUserId) });
-        //     res.json(Response.ok("Dossier dupliqué avec succès pour un autre utilisateur"));
-
-        // } catch (error) {
-        //     if (error.message.startsWith("Aucun dossier trouvé")) {
-        //         return res.status(404).json(Response.badRequest(error.message));
-        //     }
-        //     res.status(500).json(Response.serverError(res, error.message));
-        // }
+            return res.status(200).json({
+                data: folder
+            });
+        } catch (error) {
+            return next(error);
+        }
     }
 
+    async folderExists(req, res, next) {
+        try {
+            const { title } = req.body;
+    
+            if (!title) {
+                throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+    
+            const userId = req.user.userId; 
+    
+            // Vérifie si le dossier existe pour l'utilisateur donné
+            const exists = await model.folderExists(title, userId);
+    
+            return res.status(200).json({
+                exists: exists
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
+
+
 }
+
+
 
 module.exports = new FoldersController;

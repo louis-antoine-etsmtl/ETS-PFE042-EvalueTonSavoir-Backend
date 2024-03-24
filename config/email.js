@@ -35,6 +35,15 @@ class Emailer {
         });
     }
 
+    quizShare(email, link) {
+        this.transporter.sendMail({
+            from: this.senderEmail,
+            to: email,
+            subject: 'Un quiz vous a été transféré !',
+            text: 'Veuillez suivre ce lien pour ajouter ce quiz à votre compte. '+ link 
+        });
+    }
+
 }
 
 module.exports = new Emailer();

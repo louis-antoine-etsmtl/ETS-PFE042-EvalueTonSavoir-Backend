@@ -2,7 +2,7 @@ const db = require('../config/db.js')
 const { ObjectId } = require('mongodb');
 
 class Quiz {
-    
+
     async create(title, content, folderId, userId) {
         await db.connect()
         const conn = db.getConnection();
@@ -61,6 +61,15 @@ class Quiz {
 
         return true;
     }
+    async deleteQuizzesByFolderId(folderId) {
+        await db.connect();
+        const conn = db.getConnection();
+
+        const quizzesCollection = conn.collection('files');
+
+        // Delete all quizzes with the specified folderId
+        await quizzesCollection.deleteMany({ folderId: folderId });
+    }
 
     async update(quizId, newTitle, newContent) {
         await db.connect()
@@ -87,7 +96,38 @@ class Quiz {
 
         return true
     }
+
+    async duplicate(quizId, userId) {
+        
+        const sourceQuiz = await this.getContent(quizId);
+        
+        let newQuizTitle = `${sourceQuiz.title}-copy`;
+        let counter = 1;        
+        while (await this.quizExists(newQuizTitle, userId)) {
+            newQuizTitle = `${sourceQuiz.title}-copy(${counter})`;
+            counter++;
+        }
+        //console.log(newQuizTitle);
+        const newQuizId = await this.create(newQuizTitle, sourceQuiz.content,sourceQuiz.folderId, userId);
+
+        if (!newQuizId) {
+            throw new Error('Failed to create a duplicate quiz.');
+        }
+
+        return newQuizId;
+
+    }
+
+    async quizExists(title, userId) {
+        await db.connect();
+        const conn = db.getConnection();
     
+        const filesCollection = conn.collection('files');           
+        const existingFolder = await filesCollection.findOne({ title: title, userId: userId });        
+        
+        return existingFolder !== null;
+    }
+
 }
 
 module.exports = new Quiz;

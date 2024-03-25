@@ -154,6 +154,13 @@ class FoldersController {
                 throw new AppError(MISSING_REQUIRED_PARAMETER);
             }
 
+            // Is this folder mine
+            const owner = await model.getOwner(folderId);
+
+            if (owner != req.user.userId) {
+                throw new AppError(FOLDER_NOT_FOUND);
+            }
+
             const userId = req.user.userId; 
 
             const newFolderId = await model.duplicate(folderId, userId);
@@ -179,6 +186,13 @@ class FoldersController {
                 throw new AppError(MISSING_REQUIRED_PARAMETER);
             }
 
+            // Is this folder mine
+            const owner = await model.getOwner(folderId);
+
+            if (owner != req.user.userId) {
+                throw new AppError(FOLDER_NOT_FOUND);
+            }
+
             const userId = req.user.userId; // Assuming userId is obtained from authentication
 
             const newFolderId = await model.copy(folderId, userId);
@@ -202,6 +216,13 @@ class FoldersController {
 
             if (!folderId) {
                 throw new AppError(MISSING_REQUIRED_PARAMETER);
+            }
+
+            // Is this folder mine
+            const owner = await model.getOwner(folderId);
+
+            if (owner != req.user.userId) {
+                throw new AppError(FOLDER_NOT_FOUND);
             }
 
             const folder = await model.getFolderById(folderId);
